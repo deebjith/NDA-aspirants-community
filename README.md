@@ -22,3 +22,6 @@ Open `index.html` through a local/static web server, create two test accounts, o
 The folder can be deployed as a static site. Cloudflare Pages supports static HTML deployments and Git/direct upload workflows. Set the production output to this folder.
 
 The existing NDA mock tests and SSB simulator remain client-side training features. The online community features being connected here are authentication, profiles, chat messages and discussions.
+
+
+NDA Aspirants Community — latest website deployment
