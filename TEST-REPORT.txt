@@ -1,0 +1,23 @@
+NDA Aspirants Community — Final Build Verification
+Date: 2026-09-20
+
+PASS
+- 20 Mission Control feature sections present.
+- All inline JavaScript syntax checks pass.
+- Current-affairs serverless function JavaScript syntax passes.
+- All onclick/onchange/onsubmit/oninput handler names resolve to defined functions.
+- 50 chapters detected across 5 subjects.
+- 100 question entries per chapter; 5,000 total entries.
+- Every question has 4 answer options and a valid correct-answer index.
+- Local assets referenced by the HTML are present.
+- Supabase browser configuration is present.
+- robots.txt and sitemap.xml are present.
+
+FIXES APPLIED DURING VERIFICATION
+- Fixed the current-affairs API RSS item regex so the Vercel function parses correctly.
+- Added the missing mcStartBattle implementation for the Live NDA Battle feature.
+- Removed the old JOIN WITH NDA ASPIRANT badge wording from the final page branding.
+
+LIMITATION
+- A live browser smoke test and live news-feed retrieval could not be completed in this sandbox environment. The current-affairs API is intentionally fail-safe and returns an empty feed when its external sources are unavailable. Supabase authentication/realtime require the deployed environment and the configured project.
+- Live NDA Battle and the Mission Control Study Squad are local/browser MVP features; the existing Supabase Study Groups feature remains the server-backed group system.

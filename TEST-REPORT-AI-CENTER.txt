@@ -1,0 +1,26 @@
+NDA AI CENTER TEST REPORT
+
+1. Inline website JavaScript syntax: PASS
+2. nda-ai.js Node syntax: PASS
+3. ai-interview.js Node syntax: PASS
+4. AI Chat text UI: included
+5. AI Chat voice input: included via browser SpeechRecognition when supported
+6. AI Chat image input: included; image is resized client-side before API request
+7. AI Chat spoken response: included via browser SpeechSynthesis when supported
+8. Current-affairs web search mode: included server-side
+9. SSB Coach: included
+10. Question Generator: included
+11. Study Coach: included
+12. AI Interview: retained and connected to NDA AI Center
+13. API key exposure: PASS — no key is bundled; Vercel environment variable required
+14. Mobile responsive AI Center styles: included
+
+Note: live OpenAI calls cannot be verified without the owner's OPENAI_API_KEY. The deployment must have that environment variable configured before AI responses work.
+
+QUESTION BANK CHECK
+- Subjects: 5
+- Chapters: 50
+- Questions per chapter: 500
+- Total questions: 25,000
+- Duplicate question-text check across all subjects/chapters: 0 duplicates
+- Question option/answer structure validated during generation

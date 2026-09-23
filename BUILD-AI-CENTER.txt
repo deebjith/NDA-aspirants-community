@@ -1,0 +1,27 @@
+NDA Aspirants Community — NDA AI Center update
+
+Added:
+- NDA AI sidebar section
+- AI Chat with text, browser voice input, image questions and spoken answers
+- AI SSB Coach with answer feedback
+- AI Interview with voice/camera and officer visual
+- NDA AI Question Generator
+- AI Study Coach using local mock/progress summary
+- Current-affairs web search support through the server-side AI endpoint
+
+Server-side security:
+- OPENAI_API_KEY is never stored in HTML or browser JavaScript.
+- Add OPENAI_API_KEY to Vercel Environment Variables.
+- The browser calls /api/nda-ai and /api/ai-interview on the same deployment.
+
+Model:
+- NDA AI endpoint uses gpt-6-luna.
+
+QUESTION BANK UPDATE — 2026-09-19
+- 5 subjects: Mathematics, GAT, English, Current Affairs, SSB
+- 10 chapters per subject
+- 500 question entries per chapter
+- 25,000 total question entries
+- Exact question text is unique across the complete bank
+- Existing questions were retained where unique; new chapter-specific practice variants were added to reach 500 per chapter
+- Current Affairs bank uses stable/static-GK style material; live current-affairs feed remains separate
