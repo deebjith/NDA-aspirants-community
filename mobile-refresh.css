@@ -1,0 +1,5 @@
+Get-Content: 
+Line |
+   2 |  Get-Content -Raw 'site-redesign/mobile-refresh.css'
+     |  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Cannot find path 'C:\Users\DELL\Documents\Codex\2026-09-25\referenced-chatgpt-conversation-this-is-an\site-redesign\mobile-refresh.css' because it does not exist.
