@@ -3,6 +3,8 @@
   const archiveCurrent = 'https://www.upsc.gov.in/examinations/previous-question-papers';
   const archivePast = 'https://www.upsc.gov.in/examinations/previous-question-papers/archives';
   const papers = [
+    { year: 2026, session: 'II', examPage: 'https://www.upsc.gov.in/examinations/National%20Defence%20Academy%20and%20Naval%20Academy%20Examination%20%28II%29%2C%202026' },
+    { year: 2026, session: 'I', examPage: 'https://www.upsc.gov.in/examinations/National%20Defence%20Academy%20and%20Naval%20Academy%20Examination%20%28I%29%2C%202026' },
     { year: 2025, session: 'II', archive: archiveCurrent },
     { year: 2025, session: 'I', archive: archiveCurrent },
     { year: 2024, session: 'II', archive: archiveCurrent },
@@ -11,8 +13,6 @@
     { year: 2023, session: 'I', archive: archivePast },
     { year: 2022, session: 'II', archive: archivePast },
     { year: 2022, session: 'I', archive: archivePast },
-    { year: 2021, session: 'II', archive: archivePast },
-    { year: 2021, session: 'I', archive: archivePast },
   ];
   const escapeHtml = value => String(value).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
   const getPageButtons = () => [...document.querySelectorAll('.nav button[onclick*="showPage"]')];
@@ -32,7 +32,7 @@
     const nav = document.querySelector('.nav');
     const page = document.createElement('section');
     page.id = 'pyqs'; page.className = 'page';
-    page.innerHTML = `<div class="pyq-intro"><div class="pyq-banner"><span class="tag">OFFICIAL UPSC PAPERS</span><h2>Past papers. Clearer preparation.</h2><p>Open the complete Mathematics and General Ability Test papers for NDA (I) and NDA (II) from 2021–2025. Solve them under timed conditions, then review the topics you missed.</p><button class="btn secondary" type="button" onclick="window.open('https://www.upsc.gov.in/examinations/previous-question-papers','_blank','noopener')">Browse the UPSC paper archive ↗</button></div><div class="pyq-stat"><strong>10</strong><b>exam sessions</b><span class="muted">20 official subject papers · 2021–2025</span></div></div><div class="card"><div class="pyq-card-head"><div><h3 style="margin:0">NDA PYQ library</h3><div class="muted" style="font-size:12px;margin-top:4px">Choose a session to open UPSC’s original paper list.</div></div><span class="tag">2021–2025</span></div><div class="pyq-grid" id="pyqGrid"></div><p class="pyq-note">Papers are hosted by the Union Public Service Commission. Each link opens the official UPSC question-paper page; select Mathematics or General Ability Test under the listed NDA session. This site is an independent study platform and is not affiliated with UPSC.</p></div>`;
+    page.innerHTML = `<div class="pyq-intro"><div class="pyq-banner"><span class="tag">OFFICIAL UPSC PAPERS</span><h2>Past papers. Clearer preparation.</h2><p>Open the complete Mathematics and General Ability Test papers for NDA (I) and NDA (II) from 2022–2026. Solve them under timed conditions, then review the topics you missed.</p><button class="btn secondary" type="button" onclick="window.open('https://www.upsc.gov.in/examinations/previous-question-papers','_blank','noopener')">Browse the UPSC paper archive ↗</button></div><div class="pyq-stat"><strong>10</strong><b>exam sessions</b><span class="muted">20 official subject papers · 2022–2026</span></div></div><div class="card"><div class="pyq-card-head"><div><h3 style="margin:0">NDA PYQ library</h3><div class="muted" style="font-size:12px;margin-top:4px">Choose a session to open UPSC’s original paper list.</div></div><span class="tag">2022–2026</span></div><div class="pyq-grid" id="pyqGrid"></div><p class="pyq-note">Papers are hosted by the Union Public Service Commission. Each link opens the official UPSC question-paper page; select Mathematics or General Ability Test under the listed NDA session. This site is an independent study platform and is not affiliated with UPSC.</p></div>`;
     const home = document.getElementById('home');
     const pages = [...document.querySelectorAll('.page')];
     const insertBefore = pages.find(element => element.id === 'aspirants') || null;
@@ -45,7 +45,7 @@
     const grid = page.querySelector('#pyqGrid');
     grid.innerHTML = papers.map(paper => {
       const exam = `National Defence Academy and Naval Academy Examination (${paper.session}), ${paper.year}`;
-      const target = `${paper.archive}#:~:text=${encodeURIComponent(exam)}`;
+      const target = paper.examPage || `${paper.archive}#:~:text=${encodeURIComponent(exam)}`;
       return `<article class="pyq-card"><div class="pyq-card-head"><div><div class="pyq-year">NDA (${paper.session}) · ${paper.year}</div><div class="pyq-session">${paper.session === 'I' ? 'First' : 'Second'} examination session</div></div><span class="tag">UPSC</span></div><div class="pyq-subjects"><div class="pyq-subject"><b>Mathematics</b>Paper I · 300 marks</div><div class="pyq-subject"><b>General Ability</b>Paper II · 600 marks</div></div><a class="pyq-link" href="${escapeHtml(target)}" target="_blank" rel="noopener noreferrer">Open official papers <span aria-hidden="true">↗</span></a></article>`;
     }).join('');
     if (home && !document.getElementById('pyqHomeCard')) {
