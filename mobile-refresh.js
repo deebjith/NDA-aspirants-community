@@ -288,3 +288,30 @@
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init,{once:true}); else init();
 })();
 
+/* Shuffle mock choices while keeping each correct-answer key attached to its option. */
+(() => {
+  const shuffleQuestionOptions = question => {
+    if (!question || !Array.isArray(question.a) || question.a.length < 2 || !Number.isInteger(question.c) || question.c < 0 || question.c >= question.a.length) return false;
+    const choices = question.a.map((text, index) => ({ text, index }));
+    for (let i = choices.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [choices[i], choices[j]] = [choices[j], choices[i]];
+    }
+    question.a = choices.map(choice => choice.text);
+    question.c = choices.findIndex(choice => choice.index === question.c);
+    return true;
+  };
+  let shuffledQuestions = 0;
+  if (typeof quizBank !== 'undefined' && quizBank && typeof quizBank === 'object') {
+    Object.values(quizBank).forEach(chapters => {
+      if (!Array.isArray(chapters)) return;
+      chapters.forEach(chapter => {
+        if (Array.isArray(chapter.questions)) chapter.questions.forEach(question => { if (shuffleQuestionOptions(question)) shuffledQuestions++; });
+      });
+    });
+  }
+  if (typeof ssbOIR !== 'undefined' && Array.isArray(ssbOIR)) {
+    ssbOIR.forEach(question => { if (shuffleQuestionOptions(question)) shuffledQuestions++; });
+  }
+  window.ndaAnswerShuffleStats = { questions: shuffledQuestions, enabled: true };
+})();
