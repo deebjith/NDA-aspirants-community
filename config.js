@@ -7,11 +7,11 @@ window.NDA_SUPABASE_CONFIG = {
 /* Load the optional responsive refresh without changing backend credentials. */
 (() => {
   const theme = document.createElement('link');
-  theme.rel = 'stylesheet'; theme.href = '/mobile-refresh.css?v=20260925-3'; theme.dataset.siteRefresh = 'theme';
+  theme.rel = 'stylesheet'; theme.href = '/mobile-refresh.css?v=20260925-4'; theme.dataset.siteRefresh = 'theme';
   document.head.appendChild(theme);
   const loadEnhancements = () => {
     const script = document.createElement('script');
-    script.src = '/mobile-refresh.js?v=20260925-3'; script.defer = true; script.dataset.siteRefresh = 'features';
+    script.src = '/mobile-refresh.js?v=20260925-4'; script.defer = true; script.dataset.siteRefresh = 'features';
     document.body.appendChild(script);
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadEnhancements, { once: true });
