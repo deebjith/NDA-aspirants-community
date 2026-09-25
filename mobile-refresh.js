@@ -192,6 +192,11 @@
     ];
     if (typeof aiInterviewState !== 'undefined' && Array.isArray(aiInterviewState.questions)) {
       interviewQuestions.forEach(question => { if (!aiInterviewState.questions.includes(question)) aiInterviewState.questions.push(question); });
+      const progress=document.getElementById('aiProgressText'); if(progress) progress.textContent=`0 / ${aiInterviewState.questions.length}`;
+      const badge=document.getElementById('aiModeBadge');
+      if(badge && !document.getElementById('aiQuestionBankCount')){
+        const count=document.createElement('span'); count.id='aiQuestionBankCount'; count.className='tag'; count.textContent=`${aiInterviewState.questions.length} interview prompts`; badge.after(count);
+      }
     }
 
     const extraOIR = [
@@ -240,6 +245,14 @@
       if (typeof ssbPsych !== 'undefined' && Array.isArray(ssbPsych)) extraPsych.forEach(task => { if (!ssbPsych.some(existing => existing.prompt === task.prompt)) ssbPsych.push(task); });
       if (typeof ssbInterview !== 'undefined' && Array.isArray(ssbInterview)) extraSSBInterview.forEach(question => { if (!ssbInterview.includes(question)) ssbInterview.push(question); });
     } catch (error) { console.warn('Extra NDA practice prompts could not be added.', error); }
+
+    const simulator=document.getElementById('ssbSimulator');
+    const baseNote=simulator?.querySelector(':scope > p');
+    if(baseNote && !document.getElementById('ssbQuestionBankCount')){
+      const count=document.createElement('p'); count.id='ssbQuestionBankCount'; count.className='ssb-question-bank-note';
+      count.textContent='Expanded practice: 26 OIR questions · 13 psychology prompts · 14 interview questions · 5 GTO scenarios.';
+      baseNote.after(count);
+    }
 
     const gtoScenarios = [
       'Your group must move four people and limited supplies across a marked area using only the resources provided. How would you organise the group?',
