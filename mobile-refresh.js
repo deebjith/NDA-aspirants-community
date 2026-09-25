@@ -91,7 +91,187 @@
       }
     });
   };
-  const init = () => { addPyqPage(); addMobileNavigation(); bindSearchShortcut(); };
+  const addInterviewerLipSync = () => {
+    const card = document.querySelector('#aiInterview .ai-video-grid .ai-video-card:not(#candidateVideoCard)');
+    if (!card || card.dataset.lipSyncReady === 'true') return;
+    card.dataset.lipSyncReady = 'true';
+    const mouth = document.createElement('span'); mouth.className = 'ai-lipsync-mouth'; mouth.setAttribute('aria-hidden', 'true');
+    const stateLabel = document.createElement('span'); stateLabel.className = 'ai-voice-state'; stateLabel.setAttribute('aria-live', 'polite'); stateLabel.textContent = 'INTERVIEWER READY';
+    card.append(mouth, stateLabel);
+
+    const setState = state => {
+      card.classList.remove('ai-speaking', 'ai-listening', 'ai-thinking');
+      if (state !== 'ready') card.classList.add(`ai-${state}`);
+      stateLabel.textContent = ({ speaking:'AI SPEAKING', listening:'YOUR TURN', thinking:'AI THINKING', ready:'INTERVIEWER READY' })[state] || 'INTERVIEWER READY';
+    };
+    window.ndaSetInterviewerState = setState;
+
+    const originalSpeak = window.speakAIQuestion;
+    if (typeof originalSpeak === 'function') {
+      window.speakAIQuestion = function () {
+        const question = document.getElementById('aiQuestionText')?.textContent?.trim();
+        if (!question || typeof window.SpeechSynthesisUtterance !== 'function' || !window.speechSynthesis) {
+          setState('ready');
+          return originalSpeak.apply(this, arguments);
+        }
+        const token = (window.ndaInterviewerSpeechToken || 0) + 1;
+        window.ndaInterviewerSpeechToken = token;
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(question);
+        utterance.lang = 'en-IN'; utterance.rate = .92; utterance.pitch = .92;
+        const clearSpeaking = () => {
+          if (window.ndaInterviewerSpeechToken !== token) return;
+          setState('ready');
+          if (typeof window.aiSetStatus === 'function') window.aiSetStatus('Your turn — tap the microphone and answer.');
+        };
+        utterance.onstart = () => {
+          if (window.ndaInterviewerSpeechToken !== token) return;
+          setState('speaking');
+          if (typeof window.aiSetStatus === 'function') window.aiSetStatus('AI interviewer is speaking…');
+        };
+        utterance.onend = clearSpeaking;
+        utterance.onerror = clearSpeaking;
+        window.speechSynthesis.speak(utterance);
+        if (typeof window.aiSetStatus === 'function') window.aiSetStatus('AI interviewer is speaking…');
+      };
+    }
+
+    const mic = document.getElementById('aiMicBtn');
+    const syncMic = () => {
+      if (mic?.classList.contains('listening')) setState('listening');
+      else if (!card.classList.contains('ai-speaking') && !card.classList.contains('ai-thinking')) setState('ready');
+    };
+    if (mic && typeof MutationObserver === 'function') {
+      new MutationObserver(syncMic).observe(mic, { attributes:true, attributeFilter:['class'] });
+    }
+    const wrapState = (name, state, afterState) => {
+      const original = window[name];
+      if (typeof original !== 'function') return;
+      window[name] = function () {
+        setState(state);
+        const result = original.apply(this, arguments);
+        if (afterState) {
+          const finish = () => { if (!card.classList.contains('ai-speaking')) afterState(); };
+          Promise.resolve(result).then(finish, finish);
+        }
+        return result;
+      };
+    };
+    wrapState('startAIInterview','thinking');
+    wrapState('submitAIAnswer','thinking');
+    wrapState('finishAIInterview','ready', () => {
+      const total = typeof aiInterviewState !== 'undefined' ? aiInterviewState.questions.length : 10;
+      const count = document.getElementById('aiProgressText'); if (count) count.textContent = `${total} / ${total}`;
+    });
+    wrapState('endAIInterview','ready');
+
+    const originalReset = window.resetAIUI;
+    if (typeof originalReset === 'function') window.resetAIUI = function () {
+      const result = originalReset.apply(this, arguments);
+      const total = typeof aiInterviewState !== 'undefined' ? aiInterviewState.questions.length : 10;
+      const count = document.getElementById('aiProgressText'); if (count) count.textContent = `0 / ${total}`;
+      return result;
+    };
+  };
+  const expandPracticeContent = () => {
+    const interviewQuestions = [
+      'What first made you consider a career as an officer in the armed forces?',
+      'Which personal value matters most to you, and when have you had to act on it?',
+      'Tell me about a disagreement in a team and how you helped the group move forward.',
+      'Describe a responsibility you took on without being asked.',
+      'What is one mistake you have made recently, and what did you change afterward?',
+      'How do you react when someone gives you difficult feedback?',
+      'Which subject challenges you most, and what is your plan for improving in it?',
+      'Tell me about a long-term goal you worked toward and how you stayed consistent.',
+      'What would you do if a friend on your team began falling behind?',
+      'Describe a time you had to make a sensible decision with limited information.',
+      'Which recent national or defence development have you followed, and what did you learn from it?',
+      'How do you balance your study commitments with family and other responsibilities?',
+      'What habit are you actively trying to improve, and how are you measuring progress?',
+      'If your first plan failed during a group task, how would you help the team adapt?',
+    ];
+    if (typeof aiInterviewState !== 'undefined' && Array.isArray(aiInterviewState.questions)) {
+      interviewQuestions.forEach(question => { if (!aiInterviewState.questions.includes(question)) aiInterviewState.questions.push(question); });
+    }
+
+    const extraOIR = [
+      {q:'Complete the series: 3, 8, 15, 24, 35, ?',a:['44','46','48','50'],c:2},
+      {q:'Complete the series: 4, 9, 19, 39, ?',a:['69','78','79','80'],c:2},
+      {q:'You face north, turn right, turn right, then turn left. Which way are you facing?',a:['North','East','South','West'],c:1},
+      {q:'All pilots are officers. Some officers are athletes. What must be true?',a:['All pilots are athletes','Some athletes are pilots','No pilots are athletes','No conclusion about pilots and athletes follows'],c:3},
+      {q:'A square has sides of 5 cm. What is its perimeter?',a:['10 cm','15 cm','20 cm','25 cm'],c:2},
+      {q:'Complete the series: 3, 6, 12, 24, ?',a:['36','42','48','54'],c:2},
+      {q:'A vehicle covers 150 km in 2.5 hours at a steady speed. What is its speed?',a:['50 km/h','55 km/h','60 km/h','65 km/h'],c:2},
+      {q:'A team has 12 members. If 3/4 are present, how many members are present?',a:['8','9','10','11'],c:1},
+      {q:'Which item is least like the others?',a:['Cube','Sphere','Triangle','Cylinder'],c:2},
+      {q:'If 1 January is a Monday, what day is 8 January?',a:['Sunday','Monday','Tuesday','Wednesday'],c:1},
+      {q:'Complete the series: 1, 4, 9, 16, ?',a:['20','24','25','36'],c:2},
+      {q:'Four people finish a task in 6 days at the same rate. How long would 8 people take?',a:['2 days','3 days','4 days','12 days'],c:1},
+      {q:'A person walks 4 km north and then 3 km east. How far are they from the starting point?',a:['5 km','6 km','7 km','8 km'],c:0},
+      {q:'The ratio of two numbers is 2:3 and their sum is 25. What is the smaller number?',a:['8','10','12','15'],c:1},
+      {q:'Complete the letter series: B, D, F, H, ?',a:['I','J','K','L'],c:1},
+      {q:'A clock gains 5 minutes every hour. How much does it gain in 6 hours?',a:['20 minutes','25 minutes','30 minutes','35 minutes'],c:2},
+      {q:'If P is before Q and R is after Q, which order is correct?',a:['P, Q, R','Q, P, R','R, P, Q','P, R, Q'],c:0},
+      {q:'Seven birds are on a branch. Three fly away. How many remain?',a:['3','4','5','10'],c:1},
+    ];
+    const extraPsych = [
+      {type:'TAT-style story',prompt:'You notice a younger student struggling to organise a school event that begins tomorrow. Write a realistic story about what happens next.',time:240},
+      {type:'TAT-style story',prompt:'A team reaches a road closure while carrying supplies to a community programme. Show how the main character responds.',time:240},
+      {type:'WAT-style response',prompt:'Word: TEAMWORK — write the first constructive sentence or thought that comes to mind.',time:15},
+      {type:'WAT-style response',prompt:'Word: PRESSURE — write the first constructive sentence or thought that comes to mind.',time:15},
+      {type:'WAT-style response',prompt:'Word: INITIATIVE — write the first constructive sentence or thought that comes to mind.',time:15},
+      {type:'SRT-style response',prompt:'Your group is running out of time and two members disagree about the next step. What would you do?',time:30},
+      {type:'SRT-style response',prompt:'You realise you have made an error in an important assignment shortly before it is due. What would you do?',time:30},
+      {type:'SRT-style response',prompt:'A teammate is quiet during a group activity and has a useful skill for the task. How would you involve them?',time:30},
+    ];
+    const extraSSBInterview = [
+      'What responsibility at home or school has taught you the most?',
+      'Tell us about a time you encouraged someone who had lost confidence.',
+      'How do you decide what to do first when several tasks are urgent?',
+      'What would your closest friend say is one quality you should improve?',
+      'Describe a moment when you changed your opinion after hearing another person.',
+      'How do you keep yourself informed about events that affect India?',
+      'What would you do if a group plan you supported began to fail?',
+      'Which achievement are you proud of, and what effort did it require?',
+      'What does being dependable look like in everyday life?',
+    ];
+    try {
+      if (typeof ssbOIR !== 'undefined' && Array.isArray(ssbOIR)) extraOIR.forEach(question => { if (!ssbOIR.some(existing => existing.q === question.q)) ssbOIR.push(question); });
+      if (typeof ssbPsych !== 'undefined' && Array.isArray(ssbPsych)) extraPsych.forEach(task => { if (!ssbPsych.some(existing => existing.prompt === task.prompt)) ssbPsych.push(task); });
+      if (typeof ssbInterview !== 'undefined' && Array.isArray(ssbInterview)) extraSSBInterview.forEach(question => { if (!ssbInterview.includes(question)) ssbInterview.push(question); });
+    } catch (error) { console.warn('Extra NDA practice prompts could not be added.', error); }
+
+    const gtoScenarios = [
+      'Your group must move four people and limited supplies across a marked area using only the resources provided. How would you organise the group?',
+      'Your team is planning a safe route to deliver first-aid supplies after heavy rain has blocked the direct path. How would you assess options and involve everyone?',
+      'A group activity has a strict time limit and one resource is damaged. What practical plan would you suggest, and how would you adapt if it fails?',
+      'Your team must carry a fragile item across an obstacle course while keeping all members involved. How would you divide roles and protect the item?',
+      'Two groups need to share limited materials to complete a common task. How would you coordinate a fair, workable approach?',
+    ];
+    const originalRenderGTO = window.renderSSBDay3;
+    const originalFinishGTO = window.finishSSBGTO;
+    if (typeof originalRenderGTO === 'function' && typeof originalFinishGTO === 'function') {
+      window.renderSSBDay3 = function () {
+        const step = typeof ssbSim !== 'undefined' ? ssbSim.step : 0;
+        const scenario = gtoScenarios[step % gtoScenarios.length];
+        const panel = document.getElementById('ssbSimPanel');
+        if (!panel || typeof window.ssbShell !== 'function') return originalRenderGTO.apply(this, arguments);
+        panel.innerHTML = window.ssbShell('GTO Practice',`DAY 3 · GROUP TASK ${step + 1} OF ${gtoScenarios.length}`,`<div class="sim-question">${escapeHtml(scenario)}</div><textarea id="ssbGTOAnswer" class="sim-story" maxlength="1600" placeholder="Describe a safe, practical plan, how you would communicate, and how you would involve the group..."></textarea><div class="sim-actions"><button class="btn" onclick="finishSSBGTO()">Submit Plan</button></div><div class="sim-note">This digital exercise practises planning and communication. Real GTO tasks are physical and group-based.</div>`);
+        window.startSSBTimer(150,window.finishSSBGTO);
+      };
+      window.finishSSBGTO = function () {
+        window.clearSSBSimTimer();
+        const answer=(document.getElementById('ssbGTOAnswer')?.value||'').trim();
+        if(typeof ssbSim!=='undefined'){
+          ssbSim.answers.push({type:'GTO',answer});
+          if(ssbSim.step<gtoScenarios.length-1){ssbSim.step++;window.renderSSBDay3();return;}
+          ssbSim.answers=ssbSim.answers.slice(-gtoScenarios.length);
+        }
+        return originalFinishGTO.apply(this,arguments);
+      };
+    }
+  };
+  const init = () => { expandPracticeContent(); addPyqPage(); addMobileNavigation(); bindSearchShortcut(); addInterviewerLipSync(); };
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init,{once:true}); else init();
 })();
 
