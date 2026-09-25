@@ -11,7 +11,7 @@ window.NDA_SUPABASE_CONFIG = {
   document.head.appendChild(theme);
   const loadEnhancements = () => {
     const script = document.createElement('script');
-    script.src = '/mobile-refresh.js?v=20260925'; script.defer = true; script.dataset.siteRefresh = 'features';
+    script.src = '/mobile-refresh.js?v=20260925-2'; script.defer = true; script.dataset.siteRefresh = 'features';
     document.body.appendChild(script);
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadEnhancements, { once: true });
