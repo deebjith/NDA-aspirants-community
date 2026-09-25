@@ -17,11 +17,13 @@
   const escapeHtml = value => String(value).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
   const getPageButtons = () => [...document.querySelectorAll('.nav button[onclick*="showPage"]')];
   const switchPage = (id, sourceButton) => {
-    if (typeof window.showPage === 'function') window.showPage(id, sourceButton || null);
+    const navButton = sourceButton || getPageButtons().find(button => button.dataset.page === id || button.getAttribute('onclick')?.includes(`'${id}'`));
+    if (typeof window.showPage === 'function') window.showPage(id, navButton || null);
     else {
       document.querySelectorAll('.page').forEach(page => page.classList.toggle('active', page.id === id));
     }
     document.querySelectorAll('.mobile-dock button').forEach(button => button.classList.toggle('active', button.dataset.page === id));
+    if (id === 'pyqs') { const title = document.getElementById('pageTitle'); if (title) title.textContent = 'PYQ Library'; }
     document.querySelector('.mobile-sheet-backdrop')?.classList.remove('open');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
