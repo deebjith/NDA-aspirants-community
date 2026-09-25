@@ -84,6 +84,7 @@ input, textarea, select { min-height: 44px; border-color: #405775; background: #
 .ai-video-grid .ai-video-card:first-child.ai-listening .ai-voice-state { color:#aee7d5; border-color:#62c7a588; }
 .ai-video-grid .ai-video-card:first-child.ai-listening .ai-voice-state::before { background:#62c7a5; animation:ndaVoicePulse .7s ease-in-out infinite alternate; }
 .ai-video-grid .ai-video-card:first-child.ai-thinking .ai-voice-state::before { background:#83c7df; animation:ndaVoicePulse 1.1s ease-in-out infinite alternate; }
+.ssb-question-bank-note { display:inline-block; margin:0 0 14px!important; padding:7px 11px; border:1px solid #405a77; border-radius:999px; background:#172941; color:#c5d5e7!important; font-size:11px!important; }
 @keyframes ndaLipSync { from { transform:scaleY(.12) scaleX(.92); } to { transform:scaleY(1) scaleX(1.06); } }
 @keyframes ndaVoicePulse { from { opacity:.45; box-shadow:0 0 0 0 #f0c36a00; } to { opacity:1; box-shadow:0 0 0 4px #f0c36a1f; } }
 
