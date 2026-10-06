@@ -221,13 +221,13 @@
     { q:'How many commands is the Indian Air Force organised into?', options:['5','6','7','8'], correct:2 },
     { q:'The C-295 MW is described by the Ministry of Defence as belonging to which payload-capacity range?', options:['1–3 tonnes','3–5 tonnes','5–10 tonnes','10–20 tonnes'], correct:2 },
     { q:'Under the original C-295 contract, how were the 56 aircraft divided between flyaway deliveries and Indian manufacture?', options:['16 and 40','20 and 36','24 and 32','40 and 16'], correct:0 },
-    { q:'Which C-295 capability makes it suitable for reaching airstrips with limited ground infrastructure?', options:['Take-off and landing from unprepared surfaces','Carrier arrestor-hook landing','Vertical take-off','In-flight conversion to a tanker'], correct:0 },
+    { q:'Which C-295 capability lets it operate from airstrips with limited ground infrastructure?', options:['Short take-off and landing from semi-prepared surfaces','Carrier arrestor-hook landing','Vertical take-off','In-flight conversion to a tanker'], correct:0 },
     { q:'What specific loading and rapid-exit feature is fitted to the C-295?', options:['A rear ramp/door','A nose cargo hatch','A detachable wing pod','An under-fuselage lift'], correct:0 },
     { q:'Which IAF squadron became the first to operate the Tejas Light Combat Aircraft?', options:['No. 45 “Flying Daggers”','No. 1 “Tigers”','No. 18 “Flying Bullets”','No. 22 “Swifts”'], correct:0 },
     { q:'Which air station was named as the designated location for No. 45 Squadron after its initial period operating from Bengaluru?', options:['Sulur','Ambala','Gwalior','Jamnagar'], correct:0 },
     { q:'Which set best describes the Tejas role set cited at its induction?', options:['Air defence, maritime reconnaissance and strike','Heavy lift, refuelling and transport','Search and rescue, training and firefighting','Long-range bombing only'], correct:0 },
     { q:'What is the primary role of an airborne early warning and control aircraft?', options:['Detect and track airborne activity and coordinate the air picture','Carry troops to remote landing zones','Refuel fighters in flight','Train new pilots in basic handling'], correct:0 },
-    { q:'What is the main purpose of a beyond-visual-range air-to-air missile?', options:['Engage an aircraft beyond unaided visual identification range','Attack ground targets from low altitude','Intercept ballistic missiles in space','Guide transport aircraft during landing'], correct:0 },
+    { q:'What does a beyond-visual-range air-to-air missile enable a fighter to do?', options:['Engage an aircraft beyond visual range','Attack ground targets from low altitude','Intercept ballistic missiles in space','Guide transport aircraft during landing'], correct:0 },
     { q:'Which four operational capabilities were highlighted for the approved Tejas Mk-1A?', options:['AESA radar, BVR missile, electronic warfare suite and air-to-air refuelling','Stealth shaping, vertical lift, naval arrestor gear and laser cannon','Airborne radar, cargo ramp, aerial refuelling and drone control','Night vision, submarine detection, parachute delivery and afterburner'], correct:0 },
     { q:'Why are aircraft dispersal and hardened shelters useful at an air base?', options:['They can reduce vulnerability from concentrating aircraft','They make aircraft fly faster','They replace runway maintenance','They eliminate the need for air defence'], correct:0 },
     { q:'Under the 2021 approval for 83 Tejas aircraft, what was the split between Mk-1A fighters and Mk-1 trainers?', options:['73 fighters and 10 trainers','63 fighters and 20 trainers','40 fighters and 43 trainers','83 fighters and no trainers'], correct:0 },
@@ -250,6 +250,29 @@
     }
     return indexes;
   };
+  const balancedCorrectPositions = count => {
+    const positions = Array.from({length:count}, (_,index) => index % 4);
+    for (let i = positions.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [positions[i], positions[j]] = [positions[j], positions[i]];
+    }
+    return positions;
+  };
+  const buildAirForceOptionOrder = () => {
+    const correctPositions = balancedCorrectPositions(airForceQuestions.length);
+    return airForceQuestions.map((question, questionIndex) => {
+      const correctPosition = correctPositions[questionIndex];
+      const distractors = question.options.map((_, index) => index).filter(index => index !== question.correct);
+      const shuffledDistractors = shuffledOptionIndexes(distractors).map(index => distractors[index]);
+      const order = new Array(question.options.length);
+      order[correctPosition] = question.correct;
+      let distractorIndex = 0;
+      for (let position = 0; position < order.length; position++) {
+        if (position !== correctPosition) order[position] = shuffledDistractors[distractorIndex++];
+      }
+      return order;
+    });
+  };
   const closeAFDayChallenge = () => {
     document.getElementById('afDayOverlay')?.remove();
     document.body.classList.remove('af-challenge-open');
@@ -257,7 +280,7 @@
   window.startAFDayChallenge = () => {
     airForceStep = 0; airForceScore = 0; airForceSubmitting = false;
     airForceAnswers = [];
-    airForceOptionOrder = airForceQuestions.map(question => shuffledOptionIndexes(question.options));
+    airForceOptionOrder = buildAirForceOptionOrder();
     document.body.classList.add('af-challenge-open');
     let overlay = document.getElementById('afDayOverlay');
     if (!overlay) {
