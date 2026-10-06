@@ -33,7 +33,12 @@ export default async function handler(req, res) {
 
   const body = req.body && typeof req.body === 'object' ? req.body : {};
   const action = str(body.action || body.mode || body.type).toLowerCase();
-  const questionNumber = Math.min(10, Math.max(1, Number(body.questionNumber || body.question_number) || 1));
+  const requestedTotal = Math.min(100, Math.max(1, Number(body.totalQuestions || body.total_questions) || 10));
+  const requestedIndex = Number(body.questionIndex ?? body.question_index);
+  const requestedNumber = Number(body.questionNumber || body.question_number);
+  const questionNumber = Math.min(requestedTotal, Math.max(1,
+    Number.isFinite(requestedIndex) ? requestedIndex + 1 : (requestedNumber || 1)
+  ));
   const history = Array.isArray(body.history) ? body.history.slice(-10) : [];
   const answers = Array.isArray(body.answers) ? body.answers.slice(-10) : [];
   const candidateAnswer = str(body.answer || body.transcript || body.response || body.userAnswer);
@@ -53,9 +58,9 @@ export default async function handler(req, res) {
   if (wantsReport) {
     task = `Provide the final practice review for this interview transcript. Return qualitative ratings for clarity, structure, relevance, and overall. Transcript:\n${transcript || '(No answers were recorded.)'}`;
   } else if (isAnswer) {
-    task = `The interview is at question ${questionNumber} of 10. Give short feedback on the candidate's answer, then ask the next SSB-style question. If this was question 10, set question to an empty string and say the interview is complete in feedback. Current question: ${currentQuestion || '(not supplied)'}\nCandidate answer: ${candidateAnswer || '(not supplied)'}\nPrevious interview context:\n${transcript || '(No earlier answers.)'}`;
+    task = `The interview is at question ${questionNumber} of ${requestedTotal}. Give short feedback on the candidate's answer, then ask the next SSB-style question. If this was the final question (${requestedTotal}), set question to an empty string and say the interview is complete in feedback. Current question: ${currentQuestion || '(not supplied)'}\nCandidate answer: ${candidateAnswer || '(not supplied)'}\nPrevious interview context:\n${transcript || '(No earlier answers.)'}`;
   } else {
-    task = `Begin or continue an NDA SSB interview practice session. This is question ${questionNumber} of 10. Ask exactly one concise, realistic interview question and do not include an answer or score. Candidate context, if provided: ${str(body.candidateContext || body.context).slice(0, 1500) || '(none)'}. Previous interview context:\n${transcript || '(This is the start of the interview.)'}`;
+    task = `Begin or continue an NDA SSB interview practice session. This is question ${questionNumber} of ${requestedTotal}. Ask exactly one concise, realistic interview question and do not include an answer or score. Candidate context, if provided: ${str(body.candidateContext || body.context).slice(0, 1500) || '(none)'}. Previous interview context:\n${transcript || '(This is the start of the interview.)'}`;
   }
 
   try {
