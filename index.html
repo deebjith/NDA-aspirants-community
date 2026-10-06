@@ -30,6 +30,7 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="mobile-refresh.css">
 <style>
 :root{--bg:#070f0a;--panel:#0f2016;--panel2:#15291d;--line:#2c4a36;--text:#f1f7f1;--muted:#9fb3a4;--accent:#d8b84c;--accent2:#4ca3d8;--danger:#d85c5c;--success:#4cd88a}
 *{box-sizing:border-box}body{margin:0;font-family:'Poppins',Arial,Helvetica,sans-serif;background:linear-gradient(135deg,#05100a,#0c1c14);color:var(--text)}
@@ -220,6 +221,7 @@ input,textarea,select{width:100%;background:#09140d;color:white;border:1px solid
  <button onclick="showPage('discussions',this)">📝 Discussions</button>
  <button onclick="showPage('tests',this)">🎯 Mock Tests</button>
  <button onclick="showPage('progress',this)">📊 My Progress</button>
+ <button onclick="showPage('mistakes',this)">📒 Mistake Notebook</button>
  <button onclick="showPage('ssb',this)">🎖️ SSB Prep</button>
  <button onclick="showPage('aiCenter',this)">🤖 NDA AI</button>
  <button class="ai-subnav" onclick="showPage('aiChat',this)">├─ AI Chat</button>
@@ -275,7 +277,7 @@ Age: 16<br>NDA Aspirant 🇮🇳
 
 <div class="grid2" style="margin-top:16px">
 <div class="card">
-<h3>🏆 Leaderboard <span class="muted" style="font-size:12px;font-weight:400">()</span></h3>
+<h3>📊 Practice Score</h3>
 <div id="leaderboard"></div>
 </div>
 <div class="card"><h3>🛡️ Community Safety</h3><div class="notice">Keep personal information private. Use Report or Block if another user behaves inappropriately. Community chat is available to signed-in users.</div></div>
@@ -316,6 +318,8 @@ Age: 16<br>NDA Aspirant 🇮🇳
 <h3 id="chapterGridTitle">Choose a Chapter</h3>
 <p class="muted">Each attempt samples up to 15 questions from that chapter's question bank.</p>
 <div class="subjectgrid" id="chapterGrid"></div>
+<div class="topic-chooser" id="topicChooser" hidden></div>
+<div class="difficulty-chooser" id="difficultyChooser" hidden></div>
 </div>
 <div class="card" id="quizWrap" style="display:none">
 <button class="btn secondary small" style="margin-bottom:14px" onclick="showChapterSelect(currentQuizSubject)">← Back to chapters</button>
@@ -324,6 +328,7 @@ Age: 16<br>NDA Aspirant 🇮🇳
 </section>
 
 <section id="progress" class="page"><div class="grid"><div class="card"><h3>Study Progress</h3><div class="stat" id="progressPct">0%</div><div class="bar"><i id="progressBar" style="width:0%"></i></div></div><div class="card"><h3>Tests Taken</h3><div class="stat" id="testsTaken">0</div></div><div class="card"><h3>Best Score</h3><div class="stat" id="bestScore">0%</div></div></div><div class="card" style="margin-top:16px"><h3>Subjects</h3><div class="list" id="subjectProgress"></div></div></section>
+<section id="mistakes" class="page"><div class="card"><h2 style="margin-top:0">📒 Mistake Notebook</h2><p class="muted">Questions you answered incorrectly are saved on this device so you can revise them later.</p><div id="mistakeList" class="list"></div></div></section>
 
 <section id="ssb" class="page">
 <div class="card" style="margin-bottom:16px"><h3>🎖️ SSB Preparation</h3><p class="muted">Visual guides for common SSB preparation areas. Use these as preparation references, not as a guarantee of selection.</p>
@@ -500,6 +505,11 @@ Age: 16<br>NDA Aspirant 🇮🇳
       <button class="btn danger" id="aiEndBtn" type="button" onclick="endAIInterview()" disabled>⏹ End Interview</button>
       <button class="ai-mic" id="aiMicBtn" type="button" onclick="toggleAIListening()" aria-label="Speak your answer">🎙️</button>
     </div>
+    <form class="ai-text-answer" id="aiTextAnswerForm" onsubmit="submitTypedAIAnswer(event)">
+      <label for="aiTextAnswer">Or type your answer</label>
+      <textarea id="aiTextAnswer" maxlength="3000" placeholder="Write your answer here…" disabled></textarea>
+      <button class="btn secondary" id="aiTextSubmit" type="submit" disabled>Submit answer</button>
+    </form>
     <div class="ai-status" id="aiStatus">Ready. Camera and microphone are optional.</div>
     <div class="ai-transcript" id="aiTranscript"></div>
     <div class="ai-report" id="aiReport">
@@ -538,17 +548,16 @@ Age: 16<br>NDA Aspirant 🇮🇳
  <div class="auth-card">
  <div class="badge-pulse">🎖️ JOIN WITH NDA ASPIRANT</div>
  <h2 id="authTitle">Welcome, aspirant</h2>
- <p id="authIntro">Create your account or sign in to use the online community.</p>
+ <p id="authIntro">Sign in, create an online account, or continue on this device.</p>
  <form class="form" onsubmit="handleRealAuth(event)">
- <input id="loginName" maxlength="40" placeholder="Your name" required>
+ <div class="auth-mode-switch"><button type="button" class="btn" onclick="setAuthMode('signin')">Sign In</button><button type="button" class="btn secondary" onclick="setAuthMode('signup')">Create Account</button><button type="button" class="btn secondary" onclick="setAuthMode('local')">Use This Device</button></div>
+ <input id="loginName" maxlength="40" placeholder="Your name">
  <input id="loginEmail" type="email" autocomplete="email" placeholder="Email address" required>
  <input id="loginPassword" type="password" minlength="6" autocomplete="current-password" placeholder="Password (6+ characters)" required>
  <input id="loginGoal" maxlength="40" placeholder="Goal e.g. NDA 2027">
  <select id="loginSubject"><option>Mathematics</option><option>GAT</option><option>English</option><option>Current Affairs</option><option>SSB</option></select>
- <div style="display:flex;gap:8px;flex-wrap:wrap">
- <button class="btn" type="submit" name="authAction" value="signin">Sign In</button>
- <button class="btn secondary" type="submit" name="authAction" value="signup">Create Account</button>
- </div>
+ <button class="btn" id="authSubmitBtn" type="submit" name="authAction" value="signin">Sign In</button>
+ <button class="btn" id="authLocalBtn" type="button" onclick="unlockApp(event)" hidden>Continue on this device</button>
  <span class="danger-text" id="authMessage"></span>
  </form>
  </div>
@@ -769,7 +778,15 @@ let currentRoom='General';
 let currentQuizSubject=null;
 let currentQuizChapterIdx=null;
 let currentQuizQuestions=[];
+let currentQuizMisses=[];
+let currentQuizTopic=null;
+let currentQuizDifficulty=null;
 let quizIndex=0, quizScore=0, quizAnswered=false, quizTimerId=null, quizSecondsLeft=0;
+
+function readLocalJSON(key,fallback,valid){
+ try{const value=JSON.parse(localStorage.getItem(key)||'null');return value!=null&&(!valid||valid(value))?value:fallback;}
+ catch(error){return fallback;}
+}
 
 function defaultMsgsByRoom(){return{
 General:[{name:'System',text:'Welcome to the study chat. Keep it focused and respectful.',me:false,time:Date.now(),likes:0}],
@@ -781,17 +798,19 @@ SSB:[{name:'System',text:'Talk about SSB rounds, OIR, PPDT and GTO tasks.',me:fa
 }}
 
 const state={
-user:JSON.parse(localStorage.getItem('ndaUser')||'null')||{name:'NDA Aspirant',goal:'NDA',subject:'Mathematics'},
+user:readLocalJSON('ndaUser',{name:'NDA Aspirant',goal:'NDA',subject:'Mathematics'},v=>typeof v.name==='string'),
 aspirants:[],
 groups:[
 {name:'NDA Maths Warriors',subject:'Mathematics',members:24},{name:'GAT Daily Practice',subject:'GAT',members:18},
 {name:'Current Affairs 15 Min',subject:'Current Affairs',members:31},{name:'SSB Discussion Room',subject:'SSB',members:15}],
-messagesByRoom:JSON.parse(localStorage.getItem('ndaMsgsByRoom')||'null')||defaultMsgsByRoom(),
-discussions:JSON.parse(localStorage.getItem('ndaDiscussions')||'null')||[
+messagesByRoom:readLocalJSON('ndaMsgsByRoom',defaultMsgsByRoom(),v=>typeof v==='object'&&!Array.isArray(v)),
+discussions:readLocalJSON('ndaDiscussions',[
 {title:'How are you planning Maths revision?',body:'Share your topic-wise revision method.',by:'Arjun'},
 {title:'Daily current affairs sources',body:'Discuss reliable ways to revise current affairs.',by:'Kavin'}],
-scores:JSON.parse(localStorage.getItem('ndaScores')||'[]'),
-subjectScores:JSON.parse(localStorage.getItem('ndaSubjectScores')||'{}')
+Array.isArray),
+scores:readLocalJSON('ndaScores',[],Array.isArray),
+subjectScores:readLocalJSON('ndaSubjectScores',{},v=>typeof v==='object'&&!Array.isArray(v)),
+mistakes:readLocalJSON('ndaMistakes',[],Array.isArray)
 };
 
 function initApp(){
@@ -806,17 +825,19 @@ localStorage.setItem('ndaMsgsByRoom',JSON.stringify(state.messagesByRoom));
 localStorage.setItem('ndaDiscussions',JSON.stringify(state.discussions));
 localStorage.setItem('ndaScores',JSON.stringify(state.scores));
 localStorage.setItem('ndaSubjectScores',JSON.stringify(state.subjectScores));
+localStorage.setItem('ndaMistakes',JSON.stringify(state.mistakes));
 }
 function showPage(id,btn){
 document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');
 document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));if(btn)btn.classList.add('active');
-const pageNames={home:'Home',aspirants:'Aspirants',groups:'Study Groups',chat:'Chat',discussions:'Discussions',tests:'Mock Tests',progress:'My Progress',ssb:'SSB Prep',aiCenter:'NDA AI Center',aiChat:'AI Chat',ssbCoach:'SSB Coach',aiInterview:'AI Interview',questionGenerator:'Question Generator'};document.getElementById('pageTitle').textContent=pageNames[id]||id.replace(/^\w/,c=>c.toUpperCase());
+const pageNames={home:'Home',aspirants:'Aspirants',groups:'Study Groups',chat:'Chat',discussions:'Discussions',tests:'Mock Tests',progress:'My Progress',mistakes:'Mistake Notebook',ssb:'SSB Prep',aiCenter:'NDA AI Center',aiChat:'AI Chat',ssbCoach:'SSB Coach',aiInterview:'AI Interview',questionGenerator:'Question Generator'};document.getElementById('pageTitle').textContent=pageNames[id]||id.replace(/^\w/,c=>c.toUpperCase());
 if(id==='aspirants')renderAspirants();
 if(id==='groups')renderGroups();
 if(id==='chat'){renderRoomTabs();renderChips();renderMessages();}
 if(id==='discussions')renderDiscussions();
 if(id==='tests')showTestSelect();
 if(id==='progress')renderProgress();
+if(id==='mistakes')renderMistakes();
 if(id==='home')updateHome();
 }
 function renderAspirants(){const q=(document.getElementById('aspSearch')?.value||'').toLowerCase();document.getElementById('aspList').innerHTML=state.aspirants.filter(x=>(x.name+x.subject+x.goal).toLowerCase().includes(q)).map(x=>`<div class="item"><div class="person"><div class="avatar">${escapeHtml(x.name[0]||'?')}</div><div><b>${escapeHtml(x.name)}</b><br><span class="muted">${escapeHtml(x.goal)} · ${escapeHtml(x.subject)}</span></div></div></div>`).join('')||'<div class="empty">No registered aspirants found.</div>'}
@@ -860,11 +881,11 @@ function renderSubjectGrids(){
  const grid1=document.getElementById('subjectTestGrid');if(grid1)grid1.innerHTML=cards;
  const grid2=document.getElementById('homeSubjectGrid');if(grid2)grid2.innerHTML=cards;
 }
-function showTestSelect(){clearQuizTimer();document.getElementById('quizWrap').style.display='none';document.getElementById('chapterSelect').style.display='none';document.getElementById('testSubjectSelect').style.display='block';renderSubjectGrids();}
+function showTestSelect(){clearQuizTimer();document.getElementById('quizWrap').style.display='none';document.getElementById('chapterSelect').style.display='none';document.getElementById('topicChooser').hidden=true;document.getElementById('difficultyChooser').hidden=true;document.getElementById('testSubjectSelect').style.display='block';renderSubjectGrids();}
 function renderChapterGrid(subject){
  const chapters=quizBank[subject];
  document.getElementById('chapterGridTitle').textContent=subject+' — Choose a Chapter';
- document.getElementById('chapterGrid').innerHTML=chapters.map((c,i)=>`<div class="subjectcard" onclick="startChapterQuiz('${subject}',${i})"><div class="icon">${subjectIcon(subject)}</div><div>${c.name}</div><div class="best">${c.questions.length} questions</div></div>`).join('');
+ document.getElementById('chapterGrid').innerHTML=chapters.map((c,i)=>`<div class="subjectcard" onclick="chooseChapterTopics('${subject}',${i})"><div class="icon">${subjectIcon(subject)}</div><div>${c.name}</div><div class="best">${c.questions.length} questions</div></div>`).join('');
 }
 function showChapterSelect(subject){
  clearQuizTimer();
@@ -910,6 +931,7 @@ function startChapterQuiz(subject,chapterIdx){
  currentQuizChapterIdx=chapterIdx;
  const chapter=quizBank[subject][chapterIdx];
  currentQuizQuestions=shuffleArr(chapter.questions).slice(0,Math.min(15,chapter.questions.length));
+ currentQuizMisses=[];
  quizIndex=0;quizScore=0;quizAnswered=false;
  document.getElementById('testSubjectSelect').style.display='none';
  document.getElementById('chapterSelect').style.display='none';
@@ -926,7 +948,8 @@ function finishQuiz(reason){
  state.subjectScores[currentQuizSubject].push(pct);
  save();
  const chapterName=quizBank[currentQuizSubject][currentQuizChapterIdx].name;
- quiz.innerHTML=`<div class="result-card"><h2>${escapeHtml(chapterName)} Complete</h2><div class="stat">${pct}%</div><p>${quizScore}/${bank.length} correct${reason?' · '+escapeHtml(reason):''}</p><div style="display:flex;gap:10px;justify-content:center;margin-top:10px;flex-wrap:wrap"><button class="btn" onclick="startChapterQuiz('${currentQuizSubject}',${currentQuizChapterIdx})">Try Again</button><button class="btn secondary" onclick="showChapterSelect('${currentQuizSubject}')">Choose Another Chapter</button><button class="btn secondary" onclick="showTestSelect()">All Subjects</button></div></div>`;
+ const review=currentQuizMisses.length?`<details class="quiz-review"><summary>Review ${currentQuizMisses.length} missed question${currentQuizMisses.length===1?'':'s'}</summary>${currentQuizMisses.map(item=>`<article><b>${escapeHtml(item.question)}</b><p>Your answer: ${escapeHtml(item.missed)}</p><p>Correct answer: <b>${escapeHtml(item.correct)}</b></p></article>`).join('')}</details>`:'<p class="muted">Perfect round — no missed answers to review.</p>';
+ quiz.innerHTML=`<div class="result-card"><h2>${escapeHtml(chapterName)} Complete</h2><div class="stat">${pct}%</div><p>${quizScore}/${bank.length} correct${reason?' · '+escapeHtml(reason):''}</p>${review}<div style="display:flex;gap:10px;justify-content:center;margin-top:10px;flex-wrap:wrap"><button class="btn" onclick="startChapterQuiz('${currentQuizSubject}',${currentQuizChapterIdx})">Try Again</button><button class="btn secondary" onclick="showChapterSelect('${currentQuizSubject}')">Choose Another Chapter</button><button class="btn secondary" onclick="showTestSelect()">All Subjects</button></div></div>`;
  updateHome();
 }
 function renderQuestion(){
@@ -936,7 +959,7 @@ function renderQuestion(){
  quizAnswered=false;
  const x=bank[quizIndex];
  const pctDone=Math.round((quizIndex/bank.length)*100);
- quiz.innerHTML=`<div class="quiz-toolbar"><p class="muted" style="margin:0">${currentQuizSubject} · ${escapeHtml(chapterName)} · Question ${quizIndex+1} of ${bank.length}</p><div class="quiz-timer" id="quizTimer" aria-live="polite">⏱ ${formatQuizTime(quizSecondsLeft)}</div></div><div class="quiz-progress"><i style="width:${pctDone}%"></i></div><h2>${escapeHtml(x.q)}</h2><div class="list">${x.a.map((a,i)=>`<button class="btn secondary answer-choice" data-choice="${i}" style="text-align:left" onclick="answer(${i})">${String.fromCharCode(65+i)}. ${escapeHtml(a)}</button>`).join('')}</div><div id="answerFeedback" aria-live="polite"></div>`;
+ quiz.innerHTML=`<div class="quiz-toolbar"><p class="muted" style="margin:0">${currentQuizSubject} · ${escapeHtml(chapterName)}${currentQuizTopic?' · '+escapeHtml(currentQuizTopic):''} · Question ${quizIndex+1} of ${bank.length}</p><div class="quiz-timer" id="quizTimer" aria-live="polite">⏱ ${formatQuizTime(quizSecondsLeft)}</div></div><div class="quiz-progress"><i style="width:${pctDone}%"></i></div><h2>${escapeHtml(x.q)}</h2><div class="list">${x.a.map((a,i)=>`<button class="btn secondary answer-choice" data-choice="${i}" style="text-align:left" onclick="answer(${i})">${String.fromCharCode(65+i)}. ${escapeHtml(a)}</button>`).join('')}</div><div id="answerFeedback" aria-live="polite"></div>`;
  updateQuizTimer();
 }
 function answer(i){
@@ -945,6 +968,11 @@ function answer(i){
  quizAnswered=true;
  const correct=i===q.c;
  if(correct)quizScore++;
+ else {
+  const record={subject:currentQuizSubject,chapter:quizBank[currentQuizSubject][currentQuizChapterIdx].name,topic:currentQuizTopic||'',question:q.q,options:[...q.a],missed:q.a[i],correct:q.a[q.c],savedAt:Date.now()};
+  currentQuizMisses.push(record);
+  if(!state.mistakes.some(item=>item.question===record.question&&item.subject===record.subject)){state.mistakes.unshift(record);state.mistakes=state.mistakes.slice(0,200);save();}
+ }
  document.querySelectorAll('.answer-choice').forEach((btn,idx)=>{
  btn.disabled=true;
  if(idx===q.c)btn.classList.add('correct-choice');
@@ -1083,11 +1111,17 @@ function renderProgress(){
  bestScore.textContent=(state.scores.length?Math.max(...state.scores):0)+'%';
  subjectProgress.innerHTML=subs.map(s=>{const b=bestForSubject(s);return `<div class="item"><b>${subjectIcon(s)} ${s}</b><div style="flex:1;margin:0 12px"><div class="bar"><i style="width:${b}%"></i></div></div><span>${b}%</span></div>`}).join('');
 }
+function renderMistakes(){
+ const list=document.getElementById('mistakeList');if(!list)return;
+ if(!state.mistakes.length){list.innerHTML='<div class="empty">Your notebook is empty. Missed questions from mock tests will appear here for revision.</div>';return;}
+ list.innerHTML=state.mistakes.map((item,index)=>`<article class="mistake-entry"><div class="mistake-meta">${escapeHtml(item.subject)} · ${escapeHtml(item.chapter)}${item.topic?' · '+escapeHtml(item.topic):''}</div><h3>${escapeHtml(item.question)}</h3><p>Your answer: <b class="mistake-wrong">${escapeHtml(item.missed)}</b></p><p>Correct answer: <b class="mistake-correct">${escapeHtml(item.correct)}</b></p><details><summary>Show answer options</summary><ol>${(item.options||[]).map(option=>`<li>${escapeHtml(option)}</li>`).join('')}</ol></details><button class="btn secondary small" type="button" onclick="removeMistake(${index})">Remove from notebook</button></article>`).join('');
+}
+function removeMistake(index){if(index<0||index>=state.mistakes.length)return;state.mistakes.splice(index,1);save();renderMistakes();}
 
 // ---- Home extras ----
 function getStreak(){
  const today=new Date().toDateString();
- let data=JSON.parse(localStorage.getItem('ndaStreak')||'null')||{last:null,count:0};
+ let data=readLocalJSON('ndaStreak',{last:null,count:0},v=>typeof v==='object'&&!Array.isArray(v)&&Number.isFinite(v.count));
  if(data.last!==today){
  const yesterday=new Date(Date.now()-86400000).toDateString();
  data.count=data.last===yesterday?data.count+1:1;
@@ -1106,9 +1140,10 @@ function renderLeaderboard(){
 }
 function updateHome(){
  aspCount.textContent=state.aspirants.length;
+ aspCount.closest('.card').hidden=state.aspirants.length===0;
  groupCount.textContent=state.groups.length;
  userNameTop.textContent=state.user.name;
- const scoreEl=document.getElementById('scoreHome');if(scoreEl)scoreEl.textContent=(state.scores.length?Math.max(...state.scores):0)+'%';
+ const scoreEl=document.getElementById('scoreHome');if(scoreEl){scoreEl.textContent=(state.scores.length?Math.max(...state.scores):0)+'%';scoreEl.closest('.card').hidden=state.scores.length===0;}
  const streakEl=document.getElementById('streakStat');if(streakEl)streakEl.textContent=getStreak();
  const greetEl=document.getElementById('greeting');
  if(greetEl){const h=new Date().getHours();const g=h<12?'Good morning':h<17?'Good afternoon':'Good evening';greetEl.textContent=`${g}, ${state.user.name.split(' ')[0]}! Ready to train today?`;}
@@ -1123,8 +1158,20 @@ async function saveProfile(e){e.preventDefault();const next={...state.user,name:
 function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
 
 function showToast(message){const t=document.getElementById('toast');t.textContent=message;t.classList.add('show');clearTimeout(window.__toastTimer);window.__toastTimer=setTimeout(()=>t.classList.remove('show'),2600)}
+function setAuthMode(mode){
+ const local=mode==='local',signup=mode==='signup';
+ const nameField=document.getElementById('loginName'),emailField=document.getElementById('loginEmail'),passwordField=document.getElementById('loginPassword'),goalField=document.getElementById('loginGoal'),subjectField=document.getElementById('loginSubject'),submit=document.getElementById('authSubmitBtn');
+ nameField.hidden=!local&&!signup;goalField.hidden=!signup;subjectField.hidden=!signup;
+ emailField.hidden=local;passwordField.hidden=local;
+ nameField.required=signup||local;emailField.required=!local;passwordField.required=!local;
+ submit.hidden=local;submit.value=signup?'signup':'signin';submit.textContent=signup?'Create Account':'Sign In';
+ document.getElementById('authLocalBtn').hidden=!local;
+ document.getElementById('authTitle').textContent=local?'Continue on this device':signup?'Create your account':'Welcome back';
+ document.getElementById('authIntro').textContent=local?'Your progress stays in this browser on this device.':signup?'Create an online account to sync your preparation.':'Sign in to sync your preparation across devices.';
+ document.getElementById('authMessage').textContent='';
+}
 function unlockApp(e){e.preventDefault();const name=document.getElementById('loginName').value.trim();if(!name){document.getElementById('authMessage').textContent='Please enter your name.';return}state.user={...state.user,name:name.slice(0,40),goal:document.getElementById('loginGoal').value.trim().slice(0,40)||'NDA',subject:document.getElementById('loginSubject').value};save();document.getElementById('authOverlay').style.display='none';updateHome();showToast('Welcome, '+state.user.name+'!')}
-async function logout(){if(window.realBackend?.ready)await window.realBackend.supabase.auth.signOut();save();document.getElementById('profileModal').classList.remove('show');document.getElementById('loginName').value=state.user.name;document.getElementById('loginGoal').value=state.user.goal;document.getElementById('loginSubject').value=state.user.subject;document.getElementById('authOverlay').style.display='flex'}
+async function logout(){if(window.realBackend?.ready)await window.realBackend.supabase.auth.signOut();save();document.getElementById('profileModal').classList.remove('show');document.getElementById('loginName').value=state.user.name;document.getElementById('loginGoal').value=state.user.goal;document.getElementById('loginSubject').value=state.user.subject;setAuthMode('signin');document.getElementById('authOverlay').style.display='flex'}
 function ensureState(){if(!state.user||!state.user.name){document.getElementById('authOverlay').style.display='flex'}if(!state.messagesByRoom)state.messagesByRoom=defaultMsgsByRoom();rooms.forEach(r=>{if(!Array.isArray(state.messagesByRoom[r]))state.messagesByRoom[r]=[]});}
 /* ---------- REAL ONLINE BACKEND ---------- */
 async function handleRealAuth(e){
@@ -1265,7 +1312,7 @@ async function runAIStudyCoach(){
 }
 
 // ---- AI SSB Interview ----
-const aiInterviewState={active:false,listening:false,questionIndex:0,startedAt:0,timer:null,stream:null,recognition:null,answers:[],history:[],lastQuestion:'',questions:[
+const aiInterviewState={active:false,listening:false,questionIndex:0,startedAt:0,timer:null,stream:null,recognition:null,answers:[],history:[],lastQuestion:'',sessionQuestions:[],questions:[
  'Tell me about yourself. Please introduce yourself briefly.',
  'Why do you want to join the National Defence Academy?',
  'What are your strongest qualities, and where are you trying to improve?',
@@ -1279,20 +1326,21 @@ const aiInterviewState={active:false,listening:false,questionIndex:0,startedAt:0
 ]};
 function aiSetStatus(t){const el=document.getElementById('aiStatus');if(el)el.textContent=t;}
 function aiFormatTime(sec){const m=Math.floor(sec/60).toString().padStart(2,'0'),s=(sec%60).toString().padStart(2,'0');return m+':'+s;}
-function aiRenderProgress(){const n=aiInterviewState.questionIndex,total=aiInterviewState.questions.length;const t=document.getElementById('aiProgressText'),b=document.getElementById('aiProgressBar');if(t)t.textContent=Math.min(n+1,total)+' / '+total;if(b)b.style.width=Math.min(100,(n/total)*100)+'%';}
+function aiInterviewTotal(){return aiInterviewState.sessionQuestions.length||aiInterviewState.questions.length;}
+function aiQuestionKey(q){return String(q||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();}
+function aiRenderProgress(){const n=aiInterviewState.questionIndex,total=aiInterviewTotal();const t=document.getElementById('aiProgressText'),b=document.getElementById('aiProgressBar');if(t)t.textContent=Math.min(n+1,total)+' / '+total;if(b)b.style.width=Math.min(100,(n/total)*100)+'%';}
 function aiAddLine(who,text,kind){const box=document.getElementById('aiTranscript');if(!box)return;const div=document.createElement('div');div.className='ai-line '+kind;div.innerHTML='<b>'+escapeHtml(who)+'</b><br>'+escapeHtml(text);box.appendChild(div);box.scrollTop=box.scrollHeight;}
 function speakAIQuestion(){const q=aiInterviewState.lastQuestion||document.getElementById('aiQuestionText')?.textContent;if(!q)return;window.speechSynthesis?.cancel();const u=new SpeechSynthesisUtterance(q);u.lang='en-IN';u.rate=.92;u.pitch=.92;window.speechSynthesis?.speak(u);aiSetStatus('AI interviewer is speaking…');u.onend=()=>aiSetStatus('Your turn — tap the microphone and answer.');}
 async function startAICamera(){try{const stream=await navigator.mediaDevices.getUserMedia({video:true,audio:false});aiInterviewState.stream=stream;const v=document.getElementById('candidateVideo');v.srcObject=stream;v.style.display='block';document.getElementById('cameraOff').style.display='none';document.getElementById('aiCameraBtn').textContent='📷 Camera Off';}catch(e){showToast('Camera permission was not granted. Voice interview can still be used.');}}
 async function toggleAICamera(){if(aiInterviewState.stream){aiInterviewState.stream.getTracks().forEach(t=>t.stop());aiInterviewState.stream=null;document.getElementById('candidateVideo').style.display='none';document.getElementById('cameraOff').style.display='flex';document.getElementById('aiCameraBtn').textContent='📷 Camera On';return;}await startAICamera();}
 function startAITimer(){clearInterval(aiInterviewState.timer);aiInterviewState.timer=setInterval(()=>{if(!aiInterviewState.active)return;const s=Math.floor((Date.now()-aiInterviewState.startedAt)/1000);document.getElementById('aiElapsed').textContent=aiFormatTime(s);},1000);}
-function resetAIUI(){document.getElementById('aiTranscript').innerHTML='';document.getElementById('aiReport').style.display='none';document.getElementById('aiProgressBar').style.width='0%';document.getElementById('aiProgressText').textContent='0 / 10';document.getElementById('aiElapsed').textContent='00:00';document.getElementById('aiQuestionText').textContent='Click “Start Interview” and the AI interviewer will ask the first question.';}
-async function startAIInterview(){if(aiInterviewState.active)return;resetAIUI();aiInterviewState.active=true;aiInterviewState.questionIndex=0;aiInterviewState.answers=[];aiInterviewState.history=[];aiInterviewState.startedAt=Date.now();document.getElementById('aiStartBtn').disabled=true;document.getElementById('aiEndBtn').disabled=false;aiSetStatus('Starting your interview…');startAITimer();await startAICamera();await aiAskNextQuestion();}
-async function aiAskNextQuestion(){if(!aiInterviewState.active)return;const idx=aiInterviewState.questionIndex;let q=aiInterviewState.questions[idx]||'Thank you. That completes this practice interview.';if(idx===0){q=aiInterviewState.questions[0];}else{try{const previous=aiInterviewState.answers.map((a,i)=>'Q'+(i+1)+': '+a.q+'\\nA'+(i+1)+': '+a.a).join('\\n\\n');const r=await fetch('/api/ai-interview',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'question',questionIndex:idx,previous})});if(r.ok){const data=await r.json();if(data.question)q=data.question;}}catch(e){/* fall back to built-in questions */}}
-aiInterviewState.lastQuestion=q;document.getElementById('aiQuestionText').textContent=q;aiRenderProgress();aiAddLine('AI Interviewer',q,'ai');speakAIQuestion();}
+function resetAIUI(){document.getElementById('aiTranscript').innerHTML='';document.getElementById('aiReport').style.display='none';document.getElementById('aiProgressBar').style.width='0%';document.getElementById('aiProgressText').textContent='0 / '+aiInterviewTotal();document.getElementById('aiElapsed').textContent='00:00';document.getElementById('aiQuestionText').textContent='Click “Start Interview” and the AI interviewer will ask the first question.';}
+async function startAIInterview(){if(aiInterviewState.active)return;let used=[];try{const stored=JSON.parse(localStorage.getItem('nda-ai-interview-used')||'[]');if(Array.isArray(stored))used=stored;}catch(e){}const usedKeys=new Set(used.map(aiQuestionKey));const unseen=aiInterviewState.questions.filter(q=>!usedKeys.has(aiQuestionKey(q)));if(!unseen.length){aiSetStatus('You have completed every interview prompt. New prompts will be added in a future update.');showToast('You have completed all available interview prompts.');return;}for(let i=unseen.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[unseen[i],unseen[j]]=[unseen[j],unseen[i]];}aiInterviewState.sessionQuestions=unseen;resetAIUI();aiInterviewState.active=true;aiInterviewState.questionIndex=0;aiInterviewState.answers=[];aiInterviewState.history=[];aiInterviewState.startedAt=Date.now();document.getElementById('aiStartBtn').disabled=true;document.getElementById('aiEndBtn').disabled=false;document.getElementById('aiTextAnswer').disabled=false;document.getElementById('aiTextSubmit').disabled=false;aiSetStatus('Starting your interview…');startAITimer();await aiAskNextQuestion();}
+async function aiAskNextQuestion(){if(!aiInterviewState.active)return;const idx=aiInterviewState.questionIndex;const q=aiInterviewState.sessionQuestions[idx];if(!q){finishAIInterview();return;}let used=[];try{const stored=JSON.parse(localStorage.getItem('nda-ai-interview-used')||'[]');if(Array.isArray(stored))used=stored;}catch(e){}const key=aiQuestionKey(q);if(!used.some(item=>aiQuestionKey(item)===key)){used.push(q);try{localStorage.setItem('nda-ai-interview-used',JSON.stringify(used));}catch(e){}}aiInterviewState.lastQuestion=q;document.getElementById('aiQuestionText').textContent=q;aiRenderProgress();aiAddLine('AI Interviewer',q,'ai');speakAIQuestion();}
 function toggleAIListening(){if(!aiInterviewState.active){showToast('Start the interview first.');return;}if(aiInterviewState.listening){stopAIListening();return;}const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){showToast('Voice recognition is not supported in this browser. You can still use the camera and type answers in a later version.');return;}const r=new SR();r.lang='en-IN';r.interimResults=true;r.continuous=false;aiInterviewState.recognition=r;aiInterviewState.listening=true;const btn=document.getElementById('aiMicBtn');btn.classList.add('listening');aiSetStatus('Listening… speak your answer now.');let finalText='';r.onresult=e=>{let interim='';for(let i=e.resultIndex;i<e.results.length;i++){const txt=e.results[i][0].transcript;if(e.results[i].isFinal)finalText+=txt+' ';else interim+=txt;}aiSetStatus(interim?('Listening: '+interim):'Listening…');};r.onerror=e=>{stopAIListening();aiSetStatus('Microphone recognition stopped. Please try again.');};r.onend=async()=>{aiInterviewState.listening=false;btn.classList.remove('listening');if(finalText.trim())await submitAIAnswer(finalText.trim());else aiSetStatus('No answer detected. Tap the microphone and try again.');};r.start();}
 function stopAIListening(){try{aiInterviewState.recognition?.stop()}catch(e){}aiInterviewState.listening=false;document.getElementById('aiMicBtn').classList.remove('listening');}
-async function submitAIAnswer(answer){if(!aiInterviewState.active)return;const q=aiInterviewState.lastQuestion;aiInterviewState.answers.push({q,a:answer});aiAddLine('You',answer,'you');aiSetStatus('AI is reviewing your answer…');const idx=aiInterviewState.questionIndex;let feedback=null,next=null;try{const r=await fetch('/api/ai-interview',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'answer',question:q,answer,questionIndex:idx,history:aiInterviewState.answers.slice(-4)})});if(r.ok){const data=await r.json();feedback=data.feedback||null;next=data.question||null;}}catch(e){}if(feedback){aiAddLine('AI Feedback',feedback,'ai');}aiInterviewState.questionIndex++;if(aiInterviewState.questionIndex>=aiInterviewState.questions.length){finishAIInterview();return;}if(next){aiInterviewState.lastQuestion=next;document.getElementById('aiQuestionText').textContent=next;aiRenderProgress();aiAddLine('AI Interviewer',next,'ai');speakAIQuestion();}else await aiAskNextQuestion();}
-async function finishAIInterview(){aiInterviewState.active=false;stopAIListening();clearInterval(aiInterviewState.timer);if(aiInterviewState.stream){aiInterviewState.stream.getTracks().forEach(t=>t.stop());aiInterviewState.stream=null;}document.getElementById('candidateVideo').style.display='none';document.getElementById('cameraOff').style.display='flex';document.getElementById('aiCameraBtn').textContent='📷 Camera On';document.getElementById('aiStartBtn').disabled=false;document.getElementById('aiEndBtn').disabled=true;aiSetStatus('Interview complete. Preparing your practice report…');let report={clarity:'Practice',structure:'Practice',relevance:'Practice',suggestion:'Review your answers and practise again.'};try{const r=await fetch('/api/ai-interview',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'report',answers:aiInterviewState.answers})});if(r.ok)report=await r.json();}catch(e){}const grid=document.getElementById('aiReportGrid');grid.innerHTML=[['Clarity',report.clarity],['Structure',report.structure],['Relevance',report.relevance],['Overall practice',report.overall||'Keep practising']].map(x=>'<div class="ai-score-box"><span>'+escapeHtml(x[0])+'</span><strong>'+escapeHtml(String(x[1]))+'</strong></div>').join('');document.getElementById('aiReportNote').textContent=report.suggestion||'Use the feedback to improve your next practice attempt.';document.getElementById('aiReport').style.display='block';aiSetStatus('Practice interview finished.');document.getElementById('aiProgressText').textContent='10 / 10';document.getElementById('aiProgressBar').style.width='100%';}
+async function submitAIAnswer(answer){if(!aiInterviewState.active)return;const q=aiInterviewState.lastQuestion;aiInterviewState.answers.push({q,a:answer});aiAddLine('You',answer,'you');aiSetStatus('AI is reviewing your answer…');const idx=aiInterviewState.questionIndex;let feedback=null;try{const r=await fetch('/api/ai-interview',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'answer',question:q,answer,questionIndex:idx,totalQuestions:aiInterviewTotal(),history:aiInterviewState.answers.slice(-4)})});if(r.ok){const data=await r.json();feedback=data.feedback||null;}}catch(e){}if(feedback){aiAddLine('AI Feedback',feedback,'ai');}aiInterviewState.questionIndex++;if(aiInterviewState.questionIndex>=aiInterviewTotal()){finishAIInterview();return;}await aiAskNextQuestion();}
+async function finishAIInterview(){aiInterviewState.active=false;stopAIListening();clearInterval(aiInterviewState.timer);if(aiInterviewState.stream){aiInterviewState.stream.getTracks().forEach(t=>t.stop());aiInterviewState.stream=null;}document.getElementById('candidateVideo').style.display='none';document.getElementById('cameraOff').style.display='flex';document.getElementById('aiCameraBtn').textContent='📷 Camera On';document.getElementById('aiStartBtn').disabled=false;document.getElementById('aiEndBtn').disabled=true;document.getElementById('aiTextAnswer').disabled=true;document.getElementById('aiTextSubmit').disabled=true;aiSetStatus('Interview complete. Preparing your practice report…');let report={clarity:'Practice',structure:'Practice',relevance:'Practice',suggestion:'Review your answers and practise again.'};try{const r=await fetch('/api/ai-interview',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'report',answers:aiInterviewState.answers})});if(r.ok)report=await r.json();}catch(e){}const grid=document.getElementById('aiReportGrid');grid.innerHTML=[['Clarity',report.clarity],['Structure',report.structure],['Relevance',report.relevance],['Overall practice',report.overall||'Keep practising']].map(x=>'<div class="ai-score-box"><span>'+escapeHtml(x[0])+'</span><strong>'+escapeHtml(String(x[1]))+'</strong></div>').join('');document.getElementById('aiReportNote').textContent=report.suggestion||'Use the feedback to improve your next practice attempt.';document.getElementById('aiReport').style.display='block';aiSetStatus('Practice interview finished.');document.getElementById('aiProgressText').textContent=aiInterviewState.answers.length+' / '+aiInterviewTotal();document.getElementById('aiProgressBar').style.width=(aiInterviewState.answers.length/aiInterviewTotal()*100)+'%';}
 function endAIInterview(){if(!aiInterviewState.active)return;finishAIInterview();}
 
 window.realBackend={configured:false,ready:false,supabase:null,channel:null};
@@ -1308,6 +1356,7 @@ window.realBackend={configured:false,ready:false,supabase:null,channel:null};
  sb.auth.onAuthStateChange(async (_event,s)=>{if(s){state.user.id=s.user.id;window.realBackend.ready=true;}else{window.realBackend.ready=false;}});
 })();
 
+setAuthMode('signin');
 ensureState();
 renderPPDTMockGrid();
 const startFullSSBButton=document.getElementById('startFullSSBButton');
@@ -1315,5 +1364,7 @@ if(startFullSSBButton) startFullSSBButton.addEventListener('click',startFullSSBS
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeProfile()}});
 initApp();
 </script>
+<script src="mobile-refresh.js"></script>
+<script src="site-enhancements.js"></script>
 </body>
 </html>
