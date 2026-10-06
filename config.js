@@ -7,7 +7,7 @@ window.NDA_SUPABASE_CONFIG = {
 /* Load the optional responsive refresh without changing backend credentials. */
 (() => {
   const theme = document.createElement('link');
-  theme.rel = 'stylesheet'; theme.href = '/mobile-refresh.css?v=20260925-5'; theme.dataset.siteRefresh = 'theme';
+  theme.rel = 'stylesheet'; theme.href = '/mobile-refresh.css?v=20261006-airforce'; theme.dataset.siteRefresh = 'theme';
   document.head.appendChild(theme);
   const loadEnhancements = () => {
     const script = document.createElement('script');
